@@ -1437,11 +1437,6 @@
               </FileOption>
             </File>
             <File>
-              <FileName>nrfx_spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_spi.c</FilePath>
-            </File>
-            <File>
               <FileName>nrf_drv_spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_spi.c</FilePath>
@@ -1450,6 +1445,16 @@
               <FileName>nrfx_spim.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_spim.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_ppi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_ppi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_drv_ppi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_ppi.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4815,11 +4820,6 @@
               </FileOption>
             </File>
             <File>
-              <FileName>nrfx_spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_spi.c</FilePath>
-            </File>
-            <File>
               <FileName>nrf_drv_spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_spi.c</FilePath>
@@ -4828,6 +4828,16 @@
               <FileName>nrfx_spim.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_spim.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrfx_ppi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\modules\nrfx\drivers\src\nrfx_ppi.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_drv_ppi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\integration\nrfx\legacy\nrf_drv_ppi.c</FilePath>
             </File>
           </Files>
         </Group>

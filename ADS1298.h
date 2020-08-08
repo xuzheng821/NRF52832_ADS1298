@@ -201,17 +201,20 @@
 #define ADS129X_MUX_RLD_DRN     0x7 // RLD_DRN (negative electrode is the driver)
 
 // Sample-rate Configuration
-#define ADS129X_SAMPLERATE_1024 0x6
-#define ADS129X_SAMPLERATE_512  0x5
-#define ADS129X_SAMPLERATE_256  0x4
-#define ADS129X_SAMPLERATE_128  0x3
-#define ADS129X_SAMPLERATE_64   0x2
-#define ADS129X_SAMPLERATE_32   0x1
-#define ADS129X_SAMPLERATE_16   0x0
+#define ADS129X_SAMPLERATE_LP_250 	0x46
+#define ADS129X_SAMPLERATE_LP_500  	0x45
+#define ADS129X_SAMPLERATE_LP_1K  	0x44
+#define ADS129X_SAMPLERATE_LP_2K  	0x43
+#define ADS129X_SAMPLERATE_LP_4K   	0x42
+#define ADS129X_SAMPLERATE_LP_8K  	0x41
+#define ADS129X_SAMPLERATE_LP_16K   0x40
 
 void ads1298_spi_init(void);
-bool ads1298_read_register(uint8_t* val, uint8_t address, uint8_t num);
-bool ads1298_write_register(uint8_t* val, uint8_t address, uint8_t num);
+uint8_t ads1298_read_register(uint8_t reg);
+bool ads1298_read_multiple_register(uint8_t reg, uint8_t* val, uint8_t num);
+bool ads1298_write_register(uint8_t reg, uint8_t val);
+bool ads1298_write_multiple_register(uint8_t reg, uint8_t* val, uint8_t num);
 bool ads1298_write_command(uint8_t val);
+void ads1298_ppi_recv_start(void);
 
 #endif
