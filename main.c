@@ -72,6 +72,10 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
+#include "ADS1298.h"
+#include "nrf_delay.h"
+#include "nrf_drv_clock.h"
+
 #define APP_BLE_CONN_CFG_TAG            1                                           /**< A tag identifying the SoftDevice BLE configuration. */
 
 #define DEVICE_NAME                     "EMG"                               /**< Name of device. Will be included in the advertising data. */
@@ -571,13 +575,20 @@ static void advertising_start(void)
     APP_ERROR_CHECK(err_code);
 }
 
+static void lfclk_config(void)
+{
+  ret_code_t err_code = nrf_drv_clock_init();
+  APP_ERROR_CHECK(err_code);
+  nrf_drv_clock_lfclk_request(NULL);
+}
+
 
 /**@brief Application main function.
  */
 int main(void)
 {
     bool erase_bonds;
-
+		lfclk_config();
     // Initialize.
     log_init();
     timers_init();
@@ -590,9 +601,30 @@ int main(void)
     advertising_init();
     conn_params_init();
 
-    // Start execution.
-    NRF_LOG_INFO("Debug logging for UART over RTT started.");
     advertising_start();
+	
+	
+	 // Start execution.
+    NRF_LOG_INFO("Debug logging for UART over RTT started.");
+	
+	
+   nrf_delay_ms(10);
+	
+		ads1298_spi_init();
+		
+		ads1298_write_command(ADS129X_CMD_RESET);
+		
+		nrf_delay_ms(10);
+		
+		ads1298_write_command(ADS129X_CMD_SDATAC);
+	
+		uint8_t ADS1298_ID = 1;
+		
+		ads1298_read_register(&ADS1298_ID, ADS129X_REG_ID, 1);
+		
+		NRF_LOG_INFO("ADS1298_ID %x", ADS1298_ID);
+	
+	
 
     // Enter main loop.
     for (;;)
@@ -600,6 +632,7 @@ int main(void)
         idle_state_handle();
     }
 }
+
 
 
 /**
