@@ -12,18 +12,42 @@ static volatile bool spi_xfer_done;                                  /**< Flag u
 #define ADS1298_SS_LOW		nrf_drv_gpiote_clr_task_trigger(ADS1298_SS_PIN)
 #define ADS1298_SS_HIGH 	nrf_drv_gpiote_set_task_trigger(ADS1298_SS_PIN)
 
-uint8_t recvbuf[27];
+uint8_t recvbuf[9][27];
+
+int16_t channel_data[9][8];
+bool ready_to_send = false;
 
 nrf_ppi_channel_t spi_start_transfer_channel;
 nrf_ppi_channel_t spi_end_transfer_channel;
 
+int8_t recv_cnt = -1;
+
 static void spi_event_handler(nrf_drv_spi_evt_t const *p_event, void *p_context)
 {
     spi_xfer_done = true;
-		NRF_SPIM0->RXD.PTR = (uint32_t)&recvbuf;
-	
-		NRF_LOG_HEXDUMP_INFO(recvbuf, 27);
-	
+		
+		if(recv_cnt >= 0){
+				recv_cnt++;
+				if(recv_cnt == 10){
+						NRF_LOG_INFO("OK");
+						for(int i=0;i<9;i++){
+								
+								channel_data[i][0] = (recvbuf[i][3] << 8) | recvbuf[i][4];
+								channel_data[i][1] = (recvbuf[i][6] << 8) | recvbuf[i][7];
+								channel_data[i][2] = (recvbuf[i][9] << 8) | recvbuf[i][10];
+								channel_data[i][3] = (recvbuf[i][12] << 8) | recvbuf[i][13];
+								channel_data[i][4] = (recvbuf[i][15] << 8) | recvbuf[i][16];
+								channel_data[i][5] = (recvbuf[i][18] << 8) | recvbuf[i][19];
+								channel_data[i][6] = (recvbuf[i][21] << 8) | recvbuf[i][22];
+								channel_data[i][7] = (recvbuf[i][24] << 8) | recvbuf[i][25];
+							
+								ready_to_send = true;
+				
+						}
+						NRF_SPIM0->RXD.PTR = (uint32_t)&recvbuf;
+						recv_cnt = 0;
+				}
+		}
 }
 
 static void drdy_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
@@ -63,8 +87,6 @@ void ads1298_spi_init(void)
 		APP_ERROR_CHECK(ret);
 		nrf_drv_gpiote_in_event_enable(ADS1298_DRDY_PIN, true);
 		
-		
-		
 		ret = nrf_drv_ppi_init();
 		APP_ERROR_CHECK(ret);
 		ret = nrf_drv_ppi_channel_alloc(&spi_start_transfer_channel);
@@ -90,6 +112,8 @@ void ads1298_ppi_recv_start(void){
     //NRF_SPIM0->TXD.PTR = NULL;
     NRF_SPIM0->RXD.LIST =	1;
     NRF_SPIM0->RXD.PTR = (uint32_t)&recvbuf;
+	
+		recv_cnt = 0;
 	
 		ret = nrf_drv_ppi_channel_enable(spi_start_transfer_channel);
 		APP_ERROR_CHECK(ret);

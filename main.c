@@ -87,8 +87,8 @@
 
 #define APP_ADV_DURATION                18000                                       /**< The advertising duration (180 seconds) in units of 10 milliseconds. */
 
-#define MIN_CONN_INTERVAL               MSEC_TO_UNITS(20, UNIT_1_25_MS)             /**< Minimum acceptable connection interval (20 ms), Connection interval uses 1.25 ms units. */
-#define MAX_CONN_INTERVAL               MSEC_TO_UNITS(75, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (75 ms), Connection interval uses 1.25 ms units. */
+#define MIN_CONN_INTERVAL               MSEC_TO_UNITS(10, UNIT_1_25_MS)             /**< Minimum acceptable connection interval (20 ms), Connection interval uses 1.25 ms units. */
+#define MAX_CONN_INTERVAL               MSEC_TO_UNITS(10, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (75 ms), Connection interval uses 1.25 ms units. */
 #define SLAVE_LATENCY                   0                                           /**< Slave latency. */
 #define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(4000, UNIT_10_MS)             /**< Connection supervisory timeout (4 seconds), Supervision Timeout uses 10 ms units. */
 #define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(5000)                       /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
@@ -190,9 +190,8 @@ static void nus_data_handler(ble_nus_evt_t * p_evt)
 
     if (p_evt->type == BLE_NUS_EVT_RX_DATA)
     {
-        uint32_t err_code;
 
-        NRF_LOG_DEBUG("Received data from BLE NUS. Writing data on UART.");
+				NRF_LOG_DEBUG("Received data from BLE NUS. Writing data on UART.");
         NRF_LOG_HEXDUMP_DEBUG(p_evt->params.rx_data.p_data, p_evt->params.rx_data.length);
 
        
@@ -582,7 +581,8 @@ static void lfclk_config(void)
   nrf_drv_clock_lfclk_request(NULL);
 }
 
-
+extern int16_t channel_data[9][8];
+extern bool ready_to_send;
 /**@brief Application main function.
  */
 int main(void)
@@ -634,8 +634,6 @@ int main(void)
     ads1298_write_register(ADS129X_REG_WCT1, 0x0A);
     ads1298_write_register(ADS129X_REG_WCT2, 0xDC);
 		
-		
-		
     ads1298_write_command(ADS129X_CMD_START);
     ads1298_write_command(ADS129X_CMD_RDATAC);
 		
@@ -644,6 +642,12 @@ int main(void)
     // Enter main loop.
     for (;;)
     {
+				if (ready_to_send == true)
+        {
+            uint16_t llength = 144;
+            ble_nus_data_send(&m_nus, (uint8_t *)channel_data, &llength, m_conn_handle);
+            ready_to_send = false;
+        }
         idle_state_handle();
     }
 }
