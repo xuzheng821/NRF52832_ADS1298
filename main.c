@@ -581,8 +581,6 @@ static void lfclk_config(void)
   nrf_drv_clock_lfclk_request(NULL);
 }
 
-extern int16_t channel_data[9][8];
-extern bool ready_to_send;
 /**@brief Application main function.
  */
 int main(void)
@@ -640,13 +638,21 @@ int main(void)
 		ads1298_ppi_recv_start();
 
     // Enter main loop.
+		static int16_t sendbuf[120];
+		static int offset = 0;
     for (;;)
     {
-				if (ready_to_send == true)
+				if (get_data_eight_chn(sendbuf + (8 * offset)))
         {
-            uint16_t llength = 144;
-            ble_nus_data_send(&m_nus, (uint8_t *)channel_data, &llength, m_conn_handle);
-            ready_to_send = false;
+						offset++;
+						if(offset == 15){
+							
+							uint16_t llength = 240;
+							ble_nus_data_send(&m_nus, (uint8_t *)sendbuf, &llength, m_conn_handle);
+							offset = 0;
+						
+						}
+            
         }
         idle_state_handle();
     }

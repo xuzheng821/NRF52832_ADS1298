@@ -216,5 +216,6 @@ bool ads1298_write_register(uint8_t reg, uint8_t val);
 bool ads1298_write_multiple_register(uint8_t reg, uint8_t* val, uint8_t num);
 bool ads1298_write_command(uint8_t val);
 void ads1298_ppi_recv_start(void);
+bool get_data_eight_chn(int16_t* data);
 
 #endif

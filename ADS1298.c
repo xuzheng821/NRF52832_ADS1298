@@ -5,6 +5,8 @@
 #include "nrf_drv_gpiote.h"
 #include "nrf_drv_ppi.h"
 
+#include "nrf_queue.h"
+
 #define SPI_INSTANCE 0                                               /**< SPI instance index. */
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE); /**< SPI instance. */
 static volatile bool spi_xfer_done;                                  /**< Flag used to indicate that SPI instance completed the transfer. */
@@ -12,42 +14,80 @@ static volatile bool spi_xfer_done;                                  /**< Flag u
 #define ADS1298_SS_LOW		nrf_drv_gpiote_clr_task_trigger(ADS1298_SS_PIN)
 #define ADS1298_SS_HIGH 	nrf_drv_gpiote_set_task_trigger(ADS1298_SS_PIN)
 
-uint8_t recvbuf[9][27];
-
-int16_t channel_data[9][8];
-bool ready_to_send = false;
+uint8_t recvbuf[27];
 
 nrf_ppi_channel_t spi_start_transfer_channel;
 nrf_ppi_channel_t spi_end_transfer_channel;
 
-int8_t recv_cnt = -1;
+#define QUEUE_SIZE 1200
+
+NRF_QUEUE_DEF(int16_t, m_ecg1_queue, QUEUE_SIZE, NRF_QUEUE_MODE_OVERFLOW);
+NRF_QUEUE_DEF(int16_t, m_ecg2_queue, QUEUE_SIZE, NRF_QUEUE_MODE_OVERFLOW);
+NRF_QUEUE_DEF(int16_t, m_ecg3_queue, QUEUE_SIZE, NRF_QUEUE_MODE_OVERFLOW);
+NRF_QUEUE_DEF(int16_t, m_ecg4_queue, QUEUE_SIZE, NRF_QUEUE_MODE_OVERFLOW);
+NRF_QUEUE_DEF(int16_t, m_ecg5_queue, QUEUE_SIZE, NRF_QUEUE_MODE_OVERFLOW);
+NRF_QUEUE_DEF(int16_t, m_ecg6_queue, QUEUE_SIZE, NRF_QUEUE_MODE_OVERFLOW);
+NRF_QUEUE_DEF(int16_t, m_ecg7_queue, QUEUE_SIZE, NRF_QUEUE_MODE_OVERFLOW);
+NRF_QUEUE_DEF(int16_t, m_ecg8_queue, QUEUE_SIZE, NRF_QUEUE_MODE_OVERFLOW);
 
 static void spi_event_handler(nrf_drv_spi_evt_t const *p_event, void *p_context)
 {
+		int16_t channel_data;
+	
     spi_xfer_done = true;
-		
-		if(recv_cnt >= 0){
-				recv_cnt++;
-				if(recv_cnt == 10){
-						NRF_LOG_INFO("OK");
-						for(int i=0;i<9;i++){
-								
-								channel_data[i][0] = (recvbuf[i][3] << 8) | recvbuf[i][4];
-								channel_data[i][1] = (recvbuf[i][6] << 8) | recvbuf[i][7];
-								channel_data[i][2] = (recvbuf[i][9] << 8) | recvbuf[i][10];
-								channel_data[i][3] = (recvbuf[i][12] << 8) | recvbuf[i][13];
-								channel_data[i][4] = (recvbuf[i][15] << 8) | recvbuf[i][16];
-								channel_data[i][5] = (recvbuf[i][18] << 8) | recvbuf[i][19];
-								channel_data[i][6] = (recvbuf[i][21] << 8) | recvbuf[i][22];
-								channel_data[i][7] = (recvbuf[i][24] << 8) | recvbuf[i][25];
-							
-								ready_to_send = true;
+		NRF_SPIM0->RXD.PTR = (uint32_t)&recvbuf;
+	
+		channel_data = (recvbuf[3] << 8) | recvbuf[4];
+    nrf_queue_push(&m_ecg1_queue, &channel_data);
+
+    channel_data = (recvbuf[6] << 8) | recvbuf[7];
+    nrf_queue_push(&m_ecg2_queue, &channel_data);
+
+    channel_data = (recvbuf[9] << 8) | recvbuf[10];
+    nrf_queue_push(&m_ecg3_queue, &channel_data);
+
+    channel_data = (recvbuf[12] << 8) | recvbuf[13];
+    nrf_queue_push(&m_ecg4_queue, &channel_data);
+
+    channel_data = (recvbuf[15] << 8) | recvbuf[16];
+    nrf_queue_push(&m_ecg5_queue, &channel_data);
+
+    channel_data = (recvbuf[18] << 8) | recvbuf[19];
+    nrf_queue_push(&m_ecg6_queue, &channel_data);
+
+    channel_data = (recvbuf[21] << 8) | recvbuf[22];
+    nrf_queue_push(&m_ecg7_queue, &channel_data);
+
+    channel_data = (recvbuf[24] << 8) | recvbuf[25];
+    nrf_queue_push(&m_ecg8_queue, &channel_data);
 				
-						}
-						NRF_SPIM0->RXD.PTR = (uint32_t)&recvbuf;
-						recv_cnt = 0;
-				}
-		}
+}
+
+bool get_data_eight_chn(int16_t* data)
+{
+	ret_code_t ret;
+	
+	int16_t val = 0;
+	
+	ret = nrf_queue_pop(&m_ecg1_queue, &val);
+	if (ret == NRF_SUCCESS)
+	{
+			*data = val;
+			nrf_queue_pop(&m_ecg2_queue, data + 1);
+			nrf_queue_pop(&m_ecg3_queue, data + 2);
+			nrf_queue_pop(&m_ecg4_queue, data + 3);
+			nrf_queue_pop(&m_ecg5_queue, data + 4);
+			nrf_queue_pop(&m_ecg6_queue, data + 5);
+			nrf_queue_pop(&m_ecg7_queue, data + 6);
+			nrf_queue_pop(&m_ecg8_queue, data + 7);
+			
+			return true;
+		
+	} else 
+	{
+			return false;
+	}
+
 }
 
 static void drdy_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
@@ -113,8 +153,6 @@ void ads1298_ppi_recv_start(void){
     NRF_SPIM0->RXD.LIST =	1;
     NRF_SPIM0->RXD.PTR = (uint32_t)&recvbuf;
 	
-		recv_cnt = 0;
-	
 		ret = nrf_drv_ppi_channel_enable(spi_start_transfer_channel);
 		APP_ERROR_CHECK(ret);
 		ret = nrf_drv_ppi_channel_enable(spi_end_transfer_channel);
@@ -176,6 +214,8 @@ bool ads1298_write_register(uint8_t reg, uint8_t val)
 {
 	
 		ads1298_write_multiple_register(reg, &val, 1);
+	
+		return true;
 		
 }
 

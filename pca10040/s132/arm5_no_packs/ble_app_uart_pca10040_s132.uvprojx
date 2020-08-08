@@ -300,8 +300,8 @@
               </OCR_RVCT8>
               <OCR_RVCT9>
                 <Type>0</Type>
-                <StartAddress>0x20002ad8</StartAddress>
-                <Size>0xd528</Size>
+                <StartAddress>0x20002be0</StartAddress>
+                <Size>0xd420</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
@@ -2748,6 +2748,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>nrf_queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\components\libraries\queue\nrf_queue.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -6131,6 +6136,11 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+            <File>
+              <FileName>nrf_queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\components\libraries\queue\nrf_queue.c</FilePath>
             </File>
           </Files>
         </Group>
