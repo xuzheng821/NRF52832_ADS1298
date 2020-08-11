@@ -608,11 +608,12 @@ int main(void)
 		
 		ads1298_write_command(ADS129X_CMD_RESET);
 		
-		nrf_delay_us(10);
+		nrf_delay_ms(10);
 		
 		ads1298_write_command(ADS129X_CMD_SDATAC);
 		
-		NRF_LOG_INFO("ADS1298_ID %x", ads1298_read_register(ADS129X_REG_ID));
+		uint8_t regid = ads1298_read_register(ADS129X_REG_ID);
+		NRF_LOG_INFO("ADS1298_ID %x", regid);
 	
 		ads1298_write_register(ADS129X_REG_CONFIG1, ADS129X_SAMPLERATE_LP_1K);
     ads1298_write_register(ADS129X_REG_CONFIG3, (1 << ADS129X_BIT_PD_REFBUF) | (1 << ADS129X_BIT_RLDREF_INT) | (1 << ADS129X_BIT_PD_RLD));

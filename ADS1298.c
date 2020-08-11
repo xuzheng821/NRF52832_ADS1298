@@ -1,6 +1,6 @@
 #include "ADS1298.h"
 #include "nrf_drv_spi.h"
-#include "nrf_log.h"
+
 #include "nrf_delay.h"
 #include "nrf_drv_gpiote.h"
 #include "nrf_drv_ppi.h"
