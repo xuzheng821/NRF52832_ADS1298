@@ -605,10 +605,12 @@ int main(void)
     NRF_LOG_INFO("Debug logging for UART over RTT started.");
 	
 		ads1298_spi_init();
+	
+		nrf_delay_ms(10);
 		
 		ads1298_write_command(ADS129X_CMD_RESET);
 		
-		nrf_delay_ms(10);
+		nrf_delay_ms(100);
 		
 		ads1298_write_command(ADS129X_CMD_SDATAC);
 		
@@ -616,19 +618,19 @@ int main(void)
 		NRF_LOG_INFO("ADS1298_ID %x", regid);
 	
 		ads1298_write_register(ADS129X_REG_CONFIG1, ADS129X_SAMPLERATE_LP_1K);
-    ads1298_write_register(ADS129X_REG_CONFIG3, (1 << ADS129X_BIT_PD_REFBUF) | (1 << ADS129X_BIT_RLDREF_INT) | (1 << ADS129X_BIT_PD_RLD));
+    ads1298_write_register(ADS129X_REG_CONFIG3, 0xDE);
 
     ads1298_write_register(ADS129X_REG_RLD_SENSP, (1 << ADS129X_BIT_CH2) | (1 << ADS129X_BIT_CH3));
     ads1298_write_register(ADS129X_REG_RLD_SENSN, (1 << ADS129X_BIT_CH2) | (1 << ADS129X_BIT_CH3));
 
-    ads1298_write_register(ADS129X_REG_CH1SET, 0x60);
-    ads1298_write_register(ADS129X_REG_CH2SET, 0x60);
-    ads1298_write_register(ADS129X_REG_CH3SET, 0x60);
-    ads1298_write_register(ADS129X_REG_CH4SET, 0x60);
-    ads1298_write_register(ADS129X_REG_CH5SET, 0x60);
-    ads1298_write_register(ADS129X_REG_CH6SET, 0x60);
-    ads1298_write_register(ADS129X_REG_CH7SET, 0x60);
-    ads1298_write_register(ADS129X_REG_CH8SET, 0x60);
+    ads1298_write_register(ADS129X_REG_CH1SET, 0x00);
+    ads1298_write_register(ADS129X_REG_CH2SET, 0x00);
+    ads1298_write_register(ADS129X_REG_CH3SET, 0x00);
+    ads1298_write_register(ADS129X_REG_CH4SET, 0x00);
+    ads1298_write_register(ADS129X_REG_CH5SET, 0x00);
+    ads1298_write_register(ADS129X_REG_CH6SET, 0x00);
+    ads1298_write_register(ADS129X_REG_CH7SET, 0x00);
+    ads1298_write_register(ADS129X_REG_CH8SET, 0x00);
 
     ads1298_write_register(ADS129X_REG_WCT1, 0x0A);
     ads1298_write_register(ADS129X_REG_WCT2, 0xDC);
